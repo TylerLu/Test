@@ -62,18 +62,14 @@ module ApplicationHelper
 			}).body
 
 			photo_url = "/Images/header-default.jpg"
-			begin
-				JSON.parse photo
-			rescue
-				if photo.nil? || photo.empty?
-					# FileUtils.cp("#{Rails.root}/public/Images/header-default.jpg", "#{Rails.root}/public/photos/#{objectId}.jpg")
-					photo_url = "/Images/header-default.jpg"
-				else
-					File.open("#{Rails.root}/public/photos/#{objectId}.jpg", "wb") do |f|
-						f.write photo
-					end
-					photo_url = "/photos/#{objectId}.jpg"					
+			if photo.nil? || photo.empty?
+				# FileUtils.cp("#{Rails.root}/public/Images/header-default.jpg", "#{Rails.root}/public/photos/#{objectId}.jpg")
+				photo_url = "/Images/header-default.jpg"
+			else
+				File.open("#{Rails.root}/public/photos/#{objectId}.jpg", "wb") do |f|
+					f.write photo
 				end
+				photo_url = "/photos/#{objectId}.jpg"					
 			end
 			# photo_url = "/photos/#{objectId}.jpg"	
 			# SyncUserPhotoJob.set(wait_until: Date.tomorrow).perform_later(objectId, session[:token_type], session[:gmc_access_token], "#{Rails.root}/public/photos")

@@ -62,7 +62,7 @@ class AccountController < ApplicationController
 					cookies[:o365_login_email] = account.o365_email
 					redirect_to schools_path
 				else
-					redirect_to URI.encode("https://login.microsoftonline.com/common/oauth2/authorize?client_id=#{Settings.edu_graph_api.app_id}&response_type=id_token+code&response_mode=form_post&scope=openid+profile&nonce=luyao&redirect_uri=#{request.headers['HTTP_X_ARR_SSL'].blank? ? request.protocol : 'https://'}#{request.host}:#{request.port}#{Settings.redirect_uri}&state=12345&login_hint=#{account.o365_email}")
+					redirect_to URI.encode("https://login.microsoftonline.com/common/oauth2/authorize?client_id=#{Settings.edu_graph_api.app_id}&response_type=id_token+code&response_mode=form_post&scope=openid+profile&nonce=luyao&redirect_uri=#{request.protocol}#{request.host}:#{request.port}#{Settings.redirect_uri}&state=12345&login_hint=#{account.o365_email}")
 				end
 			end
 
@@ -76,7 +76,7 @@ class AccountController < ApplicationController
 	def logoff
 		session.clear
 		session[:logout] = true
-		logoff_url = URI.encode "https://login.microsoftonline.com/common/oauth2/logout?post_logout_redirect_uri=#{request.headers['HTTP_X_ARR_SSL'].blank? ? request.protocol : 'https://'}#{request.host}:#{request.port}/account/login"
+		logoff_url = URI.encode "https://login.microsoftonline.com/common/oauth2/logout?post_logout_redirect_uri=#{request.protocol}#{request.host}:#{request.port}/account/login"
 
 		redirect_to logoff_url
 	end
@@ -84,15 +84,13 @@ class AccountController < ApplicationController
 	def externalLogin
 		if cookies[:o365_login_name].present?
 		# if cookies[:o365_login_email].present?
-			authorize_url = URI.encode("https://login.microsoftonline.com/common/oauth2/authorize?client_id=#{Settings.edu_graph_api.app_id}&response_type=id_token+code&response_mode=form_post&scope=openid+profile&nonce=luyao&redirect_uri=#{request.headers['HTTP_X_ARR_SSL'].blank? ? request.protocol : 'https://'}#{request.host}:#{request.port}#{Settings.redirect_uri}&state=12345&login_hint=#{cookies[:o365_login_email]}")
+			authorize_url = URI.encode("https://login.microsoftonline.com/common/oauth2/authorize?client_id=#{Settings.edu_graph_api.app_id}&response_type=id_token+code&response_mode=form_post&scope=openid+profile&nonce=luyao&redirect_uri=#{request.protocol}#{request.host}:#{request.port}#{Settings.redirect_uri}&state=12345&login_hint=#{cookies[:o365_login_email]}")
 		else
-			authorize_url = URI.encode("https://login.microsoftonline.com/common/oauth2/authorize?client_id=#{Settings.edu_graph_api.app_id}&response_type=id_token+code&response_mode=form_post&scope=openid+profile&nonce=luyao&redirect_uri=#{request.headers['HTTP_X_ARR_SSL'].blank? ? request.protocol : 'https://'}#{request.host}:#{request.port}#{Settings.redirect_uri}&state=12345")
+			authorize_url = URI.encode("https://login.microsoftonline.com/common/oauth2/authorize?client_id=#{Settings.edu_graph_api.app_id}&response_type=id_token+code&response_mode=form_post&scope=openid+profile&nonce=luyao&redirect_uri=#{request.protocol}#{request.host}:#{request.port}#{Settings.redirect_uri}&state=12345")
 		end
 		# authorize_url = "https://login.microsoftonline.com/common/oauth2/authorize?client_id=4e3fa16f-9909-4bf6-9a66-5560e97e7082&response_mode=form_post&response_type=code+id_token&scope=openid+profile&state=OpenIdConnect.AuthenticationProperties%3dFGIkOZJ1POGoP0oT-TN3C1Blh3vzoO4gaudl1Q5Kd6H9AN87Kudcm7JRKqmdkbXCBWNPBnzBa-fwge4lAKyU7lBpK0M8Ff8dpzYf1e3h0eQ5ZHtxCoZn5cUOpWWNik7d14x-Lqh0uIdNRV9ImTZPZA&nonce=636243821732871340.MzA5ZjM3ZWUtMWE2YS00OTE0LThlN2ItYTUzZGZhYzVhMzMzMzgzNTExYjEtOGFlZi00MmI2LWExMTUtYzlmZGI0NTI3MTM2&redirect_uri=https%3a%2f%2fedugraphapidev.azurewebsites.net%2f&post_logout_redirect_uri=https%3a%2f%2fedugraphapidev.azurewebsites.net"
 	
 		redirect_to authorize_url
-
-		# redirect_to '/auth/azureactivedirectory'
 	end
 
 	def register
@@ -142,7 +140,7 @@ class AccountController < ApplicationController
 			grant_type: 'authorization_code',
 			client_id: Settings.edu_graph_api.app_id,
 			code: authorization_code,
-			redirect_uri: "#{request.headers['HTTP_X_ARR_SSL'].blank? ? request.protocol : 'https://' }#{request.host}:#{request.port}#{Settings.redirect_uri}",
+			redirect_uri: "#{request.protocol}#{request.host}:#{request.port}#{Settings.redirect_uri}",
 			client_secret: Settings.edu_graph_api.default_key,
 			resource: 'https://graph.windows.net'
 		}).body
@@ -154,26 +152,17 @@ class AccountController < ApplicationController
 		session[:gwn_refresh_token] = res["refresh_token"]
 		session[:gwn_access_token] = res["access_token"]
 
-		adal = ADAL::AuthenticationContext.new
-		client_cred = ADAL::ClientCredential.new(Settings.edu_graph_api.app_id, Settings.edu_graph_api.default_key)
-
-
-		tmp_res = adal.acquire_token_with_refresh_token(res["refresh_token"], client_cred, 'https://graph.microsoft.com')
-		session[:gmc_refresh_token] = tmp_res.refresh_token
-		session[:gmc_access_token] = tmp_res.access_token
-
-		# res = JSON.parse HTTParty.post('https://login.microsoftonline.com/common/oauth2/token', body: {
-		# 	grant_type: 'refresh_token',
-		# 	client_id: Settings.edu_graph_api.app_id,
-		# 	refresh_token: res["refresh_token"],
-		# 	client_secret: Settings.edu_graph_api.default_key,
-		# 	resource: 'https://graph.microsoft.com'
-		# }).body
-		# p res
+		res = JSON.parse HTTParty.post('https://login.microsoftonline.com/common/oauth2/token', body: {
+			grant_type: 'refresh_token',
+			client_id: Settings.edu_graph_api.app_id,
+			refresh_token: res["refresh_token"],
+			client_secret: Settings.edu_graph_api.default_key,
+			resource: 'https://graph.microsoft.com'
+		}).body
 
 		# session[:gmc_expires_in] = res["expires_in"]
-		# session[:gmc_refresh_token] = res["refresh_token"]
-		# session[:gmc_access_token] = res["access_token"]
+		session[:gmc_refresh_token] = res["refresh_token"]
+		session[:gmc_access_token] = res["access_token"]
 
 
 		if id_token
@@ -188,13 +177,6 @@ class AccountController < ApplicationController
 		#用的本地账号登录，关联o365账号
 		if session[:current_user] && session[:current_user][:email]
 			account = Account.find_by_email(session[:current_user][:email])
-
-			if Account.find_by_o365_email(id_token.raw_attributes["unique_name"])
-				# o365账号已经关联
-				redirect_to link_index_path, notice: "Failed to link accounts. The Office 365 account '#{id_token.raw_attributes["unique_name"]}' is already linked to another local account."
-				return
-			end
-
 			account.o365_email = id_token.raw_attributes["unique_name"]
 
 			_token = Token.find_by_o365email(account.o365_email)

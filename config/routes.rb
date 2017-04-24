@@ -1,5 +1,4 @@
 Rails.application.routes.draw do
-  root to: redirect('/account/login')
 
   resources :admin, only: :index do 
     collection do 
@@ -32,9 +31,6 @@ Rails.application.routes.draw do
     end
   end
 
-  # get '/auth/azureactivedirectory', as: :sign_in
-  # match '/auth/:provider/callback', to: 'account#callback', via: [:get, :post]
-
   match '/Account/Callback' => 'account#callback', via: [:get, :post]
 
   resources :account, only: [:index] do 
@@ -57,8 +53,6 @@ Rails.application.routes.draw do
       # post :processcode
       post :link_to_local_account
       get :login_local
-      get :login_o365_required
-      get :relogin_o365
       match :create_local_account, via: [:get, :post]
     end
   end

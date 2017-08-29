@@ -8,6 +8,8 @@
 
 #### TEST 12
 
+**TEST Bold**
+
 ### TEST 2
 
 This README would normally document whatever steps are necessary to get the

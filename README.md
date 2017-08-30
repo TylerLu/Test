@@ -2,6 +2,24 @@
 
 [Test ab](Deply.pptx)
 
+## Demo scenario overview and flow
+
+See the [Demo Script](Demo Script.pptx) slide deck.
+
+## Running the demo
+
+Follow the steps in [Demo Script](Demo Script.pptx) slide deck.
+
+
+## Demo scenario overview and flow
+
+See the [Demo Script](Demo%20Script.pptx) slide deck.
+
+## Running the demo
+
+Follow the steps in [Demo Script](Demo%20Script.pptx) slide deck.
+
+
 ## TEST
 
 ### TEST 1

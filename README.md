@@ -71,4 +71,5 @@ Click the Deploy to Azure Button:
    - In the Redirect URI (optional) section, select **Web** in the combo-box and enter the following redirect URIs: `http://localhost:8000/account/signin/azure_ad/callback`.
 
      > **Note:** The redirect URI is set for `localhost` instead of `127.0.0.1` which is the default IP Address used by the Django development server. This is because Azure AD requires that the redirect URL **must start with HTTPS or http://localhost**.
+
      > If you desire, you can enable SSL for the development server and add another redirect URI like `https://127.0.0.1:8000`.
